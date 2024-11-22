@@ -1,0 +1,606 @@
+# 实验原理
+
+## 1. 目标检测问题概述
+
+&emsp;&emsp;考虑以下问题：任意给定一张图片，要求在该图片中找到其所包含的目标对象和每个目标对象所在的位置，如图1-1所示。
+
+<center><img src="../assets/1-1.jpg" width = 550></center>
+<center>图1-1 在图片中识别与定位目标对象</center>
+
+&emsp;&emsp;可以将上述问题分成2个子问题：（1）找到图片中哪些位置、哪些区域含有目标对象；（2）识别这些区域中的目标对象是什么。
+
+&emsp;&emsp;基于CNN的目标检测算法已经能够很好地解决第2个问题——在一张图片仅含一个对象，且该对象占据了整张图片的绝大部分面积时，基于CNN的对象识别算法具有很高的准确率。因此，要解决上述的目标检测问题，只需考虑如何在图片中定位各个对象即可。
+
+&emsp;&emsp;一种定位目标对象的朴素思路是首先对图片进行地毯式搜索，遍历图片中所有可能出现目标对象的区域，并对每个区域进行目标对象的检测操作；然后从所有区域的目标检测结果中挑选一个概率最大的作为最终结果并输出。显然，这种方法效率很低。
+
+&emsp;&emsp;为了提高解决目标检测问题的效率，[R-CNN](https://github.com/rbgirshick/rcnn)（Region-CNN）开创性地提出了基于候选区（Region Proposals）进行目标检测的选择性搜索（Selective Search）方法——先从图片中搜索出约1000至2000个可能存在目标对象的候选区，然后对每个候选区进行目标对象识别操作。这种方法大幅提升了目标检测的效率。
+
+&emsp;&emsp;不过R-CNN的效率依然不高——处理一张图片大概需要49秒。开发者针对神经网络结构和候选区算法进行不断改进，推出了速度更快的[Fast R-CNN](https://arxiv.org/abs/1504.08083)和[Faster R-CNN](https://arxiv.org/abs/1506.01497)。Faster R-CNN可以达到约0.2秒/张图片的速度，如图1-2所示。
+
+<center><img src="../assets/1-2.jpg" width = 400></center>
+<center>图1-2 RCNN的演变及其效率</center>
+
+&emsp;&emsp;与原始的R-CNN相比，Faster R-CNN的性能已经提升了很多。但R-CNN系列的目标检测算法始终需要分两个阶段进行——先选择出候选区，再识别候选区中的对象。这在根本上限制了R-CNN算法性能的进一步提升。
+
+## 2. YOLO算法简介
+
+&emsp;&emsp;[YOLO](https://pjreddie.com/darknet/yolo/)（You Only Look Once）是一种基于深度神经网络的目标对象识别和定位算法，其特点是运行速度快、实时性高。在本实验中，我们将使用Tiny YOLOv2版本的YOLO算法。
+
+&emsp;&emsp;YOLO算法创造性地将R-CNN目标检测中的选择候选区和识别候选区对象两个阶段合二为一，这也是YOLO名字的来由（只需看一眼就知道图片的哪些位置有什么对象）。
+
+&emsp;&emsp;在检测目标时，YOLO首先将图片划分为7×7=49的网格，并允许在每个网格中预测出2个可能包含目标对象的候选边框（Bounding Box）。可将YOLO算法产生的98个Bounding Box理解成98个候选区，它们粗糙地覆盖了整张输入图片。
+
+&emsp;&emsp;不管是R-CNN还是YOLO，都需要对选出的候选区进行目标对象的识别操作。识别出某个候选区中的对象后，往往需要对该候选区进行微调，使之包含整个对象，这个微调的过程称为候选区的边框回归。边框回归行之有效的原理是对象识别结果的分类信息中已经包含了对象的位置信息。比如当我们看到猫的脸和身体，我们就能推测出猫耳朵和屁股所在的位置，如图1-3所示。
+
+<center><img src="../assets/1-3.jpg" width = 400></center>
+<center>图1-3 边框回归</center>
+
+### 2.1 YOLOv1算法和网络模型
+
+&emsp;&emsp;R-CNN系列算法的基本思路是候选+识别/分类，因此被称作是两级级联（Two-Stage Cascade）的算法。而YOLOv1算法则更为直接——直接在输出层对Bounding Box的位置和其中的对象所属的类别进行回归，从而将目标检测问题转换为回归问题（Regression）。
+
+&emsp;&emsp;YOLOv1的主要流程包括图片分割、CNN和非极大值抑制，如图1-4所示。
+
+<center><img src="../assets/1-4.png"></center>
+<center>图1-4 YOLOv1算法的主要流程</center>
+
+#### Step1：图片分割
+
+&emsp;&emsp;将输入图片的大小缩放到448×448，并进行分割，得到一个7×7的网格。每个网格允许预测出2个可能包含目标对象的Bounding Box，因此共有98个Bounding Box。
+
+&emsp;&emsp;可将每个Bounding Box定位为5元组$BBox=(X_c, Y_c, W, H, Conf)$，其中：
+
+&emsp;&emsp;$X_c$：Bounding Box所在中心点的X坐标的值；
+
+&emsp;&emsp;$Y_c$：Bounding Box所在中心点的Y坐标的值；
+
+&emsp;&emsp;$W$：Bounding Box的宽度，单位是像素；
+
+&emsp;&emsp;$H$：Bounding Box的高度，单位是像素；
+
+&emsp;&emsp;$Conf$：Bounding Box的对象识别置信度（Confidence）。
+
+&emsp;&emsp;置信度$Conf$的计算公式如式(1-1)所示。
+
+$$ Conf = Pr⁡(Object) * IoU_{pred}^{truth} \tag {1-1} $$
+
+&emsp;&emsp;其中，$Pr⁡(Object)$表示$BBox$含有目标对象的可能性，$IoU_{pred}^{truth}$是所预测边框与理想候选框之间的交并比（Intersection Over Union, IoU），代表了$BBox$所对应的候选边框的准确度，如图1-5所示。IoU越接近1，表示预测边框准确度越高，越接近理想的候选边框。
+
+<center><img src="../assets/1-5.png" width = 300></center>
+<center>图1-5 交并比的形象化定义</center>
+
+#### Step2：利用CNN提取特征与预测
+
+&emsp;&emsp;YOLOv1通过CNN中的卷积操作提取图像特征，并通过全连接层对BBox中可能存在的目标对象进行预测，得到每个BBox的置信度。计算出全部BBox的置信度后，就可以得出图片中包含的目标对象的分类信息。
+
+&emsp;&emsp;YOLOv1采用修改的GoogleLeNet作为基础CNN（Base CNN），如图1-6所示。
+
+<center><img src="../assets/1-6.png"></center>
+<center>图1-6 YOLOv1网络结构</center>
+
+&emsp;&emsp;表面上，YOLOv1的输出只有1个（比Faster R-CNN的2个输出要少），但YOLOv1网络的输出具有较为复杂的格式。
+
+&emsp;&emsp;YOLOv1的输出是一个维度为7×7×30的张量（Tensor）。其中，“7×7”表示输入图像被分割成的49个网格；“30”表示每个网格对应一个30维的向量，该向量的格式如图1-7所示。
+ 
+<center><img src="../assets/1-7.png"></center>
+<center>图1-7 YOLOv1输出格式</center>
+
+&emsp;&emsp;其中，S代表输入图片的一条边被划分成几等分；B代表每个网格预测出的BBox个数；C代表YOLO能识别出的目标对象的类别数。比如，对于YOLOv1，一张图片被划分成7×7的网格，因此S为7；每个网格可预测出2个BBox，因此B为2；YOLOv1支持识别出20种对象，因此C为20。
+
+&emsp;&emsp;图1-6左侧的绿色矩形即为YOLOv1输出张量中的30维向量，该向量由2个BBox五元组（共10维）和一个维度为20的物体分类概率向量组成。
+根据以上描述，不难得出输出张量的维度计算公式如式(1-2)所示。
+
+$$ Dim_{out} = S^2 ∙ (5B + C) \tag {1-2} $$
+
+&emsp;&emsp;此外，YOLOv1设置了参数λ，作为损失函数（Loss Function）计算公式中各个子项的权重。
+
+#### Step3：非极大值抑制(Non-Maximum Suppression, NMS)
+
+&emsp;&emsp;为了解决一个目标对象被多次检测的问题（如图1-8所示），所有目标检测算法都使用了NMS。
+
+<center><img src="../assets/1-8.jpg" width = 450></center>
+<center>图1-8 同一目标被多次检测的典型例子</center>
+
+&emsp;&emsp;NMS的基本原理是：首先从所有候选框中找到置信度最大的候选框BBox_max，然后遍历剩余所有的候选框BBox_i，并计算BBox_max和BBox_i的IOU；若IOU大于设定的阈值，说明BBox_i与BBox_max重合度过高，此时把BBox_i剔除。
+
+&emsp;&emsp;YOLO算法在预测目标对象时，先使用NMS剔除部分候选框，再确定剩余候选框的类别，如图1-9所示。
+
+<center><img src="../assets/1-9.png"></center>
+<center>图1-9 YOLO算法使用NMS预测目标</center>
+
+&emsp;&emsp;分析图1-9，可知YOLO算法使用NMS进行预测时，大致可分4个步骤：
+
+&emsp;&emsp;1）遍历所有BBox，将每个BBox中小于设定阈值的置信度设置为0；
+
+&emsp;&emsp;2）根据置信度的大小，对98个BBox进行降序排序；
+
+&emsp;&emsp;3）对每个BBox进行NMS操作，将重合候选框的置信度设置为0；
+
+&emsp;&emsp;4）确定各个BBox所含对象的类别，输出置信度大于0的检测结果。
+
+### 2.2 YOLOv2算法和网络模型
+
+&emsp;&emsp;与YOLOv1相比，YOLOv2在预测准确度、预测速度和预测种类数量3个方面作了优化和改进。YOLOv2具有2个版本：一个版本和YOLOv1一样，只能支持20种目标的分类和识别；另一个版本可支持9000种目标的分类和识别，因此该版本又被称为YOLO9000。实际上，YOLOv2更像是[SSD](https://arxiv.org/abs/1512.02325)（Single Shot MultiBox Detector）的升级版。
+
+&emsp;&emsp;YOLOv2参考了前人的经验（如[VGG](https://arxiv.org/abs/1409.1556), Visual Geometry Group），使用了新的分类网络来提取特征——采用了较多的3×3卷积核，在每一次池化操作后将通道数翻倍。此外，YOLOv2借鉴了[NIN](https://arxiv.org/abs/1312.4400)（Network In Network）的思想，使用了全局平均池化（Global Average Pooling）的策略，将1×1的卷积核置于3×3的卷积核之间，用来压缩特征，同时还使用了批标准化（[Batch Normalization](https://machinelearningmastery.com/batch-normalization-for-training-of-deep-neural-networks/)）方法来稳定模型的训练。
+
+&emsp;&emsp;此外，YOLOv2还借鉴了Faster R-CNN，将对类别的预测放到Anchor Box当中。为了引入[Anchor Box](https://blog.csdn.net/weixin_42285271/article/details/87925322)来预测候选框，YOLO作者作了以下改进和调整：
+
+&emsp;&emsp;1）去掉网络中的全连接层——因为全连接层丢失了空间和位置信息；
+
+&emsp;&emsp;2）去掉卷积网络的最后一个池化层，提高输出特征图的分辨率；
+
+&emsp;&emsp;3）将YOLOv1的输入图片尺寸从448×448调整为416×416，这是为了使得特征图的高和宽都是  
+&emsp;&emsp;奇数，从而产生一个中间的网格（Central Cell）；
+
+&emsp;&emsp;4）将输入图片划分成13×13的网格，并在每个网格中设置5个Anchor Box。
+
+&emsp;&emsp;加入Anchor Box后，网络的召回率（[Recall](https://www.zhihu.com/question/19645541)）上升，准确率（mean Average Precision, mAP）略微下降。比如，加入Anchor Box前，模型的召回率为81%，准确率为69.5%；加入Anchor Box后，模型召回率为88%，准确率稍稍降低到69.2%。在准确率小幅下降时，能够将召回率提高7%，说明原来的模型的确具有改进的空间。
+
+&emsp;&emsp;YOLOv2的网络结构仍然是以卷积和池化为主。输入图像的尺寸是416×416×3（长宽各416像素，分红、绿、蓝3个通道），输出张量的尺寸是13×13×5×25（图像被划分成13×13的网格，每个网格根据所设置的5个Anchor Box预测出5个候选框），如图1-10所示。
+
+<center><img src="../assets/1-10.jpg"></center>
+<center>图1-10 YOLOv2网络示意图</center>
+
+&emsp;&emsp;在输出张量中，每个候选框包含25维的特征。特征由3部分组成：候选框可能包含的20类目标对象的概率（20维）、候选框中心点坐标和长宽的预测（4维）、候选框的置信度（1维）。
+
+&emsp;&emsp;假设S代表输入图片的一条边被划分成几等分；B代表每个网格预测出的BBox个数；C代表YOLO能识别出的目标对象的类别数。比如，对于YOLOv2，一张图片被划分成13×13的网格，因此S为13；每个网格可预测出5个BBox，因此B为5；YOLOv2支持识别出20中对象，因此C为20。基于此，可得出YOLOv2输出张量的维度计算公式如式(1-3)所示。
+
+$$ Dim_{out} = S^2∙B∙(5+C) \tag {1-3} $$
+
+&emsp;&emsp;YOLOv2将输入图片分割成了更细小的网格，对小目标的适应性比YOLOv1更好。但也正因如此，加上使用了Anchor Box，YOLOv2的计算量比YOLOv1增加了不少，网络大小也随之增加。
+
+### 2.3 Tiny YOLOv2算法和网络模型
+
+&emsp;&emsp;本实验采用轻量版的YOLOv2，即Tiny YOLOv2来实现目标检测。Tiny YOLOv2包含9个卷积层和6个最大池化层，如图1-11所示。
+
+<center><img src="../assets/1-11.png"></center>
+<center>图1-11 Tiny YOLOv2网络模型结构</center>
+
+&emsp;&emsp;Tiny YOLOv2目标检测算法具有预处理、网络推导和后处理三个步骤：
+
+&emsp;&emsp;1）预处理：对输入的任意分辨率的RGB图像，将各通道像素点的像素值归一化到[0, 1]区间，  
+&emsp;&emsp;并按原图的长宽比例，将图像的尺寸缩放至416×416（以0.5填充）；
+
+&emsp;&emsp;2）网络推导：将归一化后的416×416×3图像输入到Tiny YOLOv2网络进行前向推导，得到  
+&emsp;&emsp;13×13×5×25的输出张量；
+
+&emsp;&emsp;3）后处理：根据输出张量的格式，得到每个边框的中心点坐标以及长和宽，并根据各边框的  
+&emsp;&emsp;覆盖度和置信度等信息，对所有13×13×5个边框进行NMS处理，得到最可能包含目标对象的  
+&emsp;&emsp;候选框。最后根据1）中的缩放比率，将得到的候选边框放大并在原图中显示，即可得到目标  
+&emsp;&emsp;对象的位置和类别信息。
+
+&emsp;&emsp;分析Tiny YOLOv2的网络结构和算法步骤，可知其主要运算是卷积和池化。
+
+&emsp;&emsp;卷积层使用不同的卷积核对输入特征图进行特征提取，其伪代码如图1-12所示。
+
+``` C++
+for (m = 0; m < OUT_CH; m++)
+  for (r = 0; r < OUT_ROW; r++)
+    for (c = 0; c < OUT_COL; c++)
+    {
+      tmp = 0;
+      for (n = 0; n < IN_CH; n++)
+        for (ky = 0; ky < KERN_R; ky++)
+          for (kx = 0; kx < KERN_C; kx++)
+            tmp += feat_in(n, r*STRIDE+ky, c*STRIDE+kx) * weight(m, n, ky, kx);
+      feat_out(m, r, c) = tmp + bias(m);
+    }
+```
+
+<center>图1-12 卷积操作的伪代码</center>
+
+&emsp;&emsp;其中，`OUT_CH`、`(OUT_ROW，OUT_COL)`、`IN_CH`、`(KERN_R，KERN_C)`和`STRIDE`分别代表输出通道数、输出特征图大小、输入通道数、卷积核大小和卷积步长；`feat_out(m, r, c)`代表输出特征图第`m`通道第`r`行第`c`列的像素值。
+
+&emsp;&emsp;一般在卷积层后设置一个池化层，用于对特征图进行降采样，缩小特征图。Tiny YOLOv2使用最大池化操作，其伪代码如图1-13所示。
+
+``` C++
+for (m = 0; m < OUT_CH; m++)
+  for (r = 0; r < OUT_ROW; r++)
+    for (c = 0; c < OUT_COL; c++)
+    {
+      max = 0;
+      for (ky = 0; ky < KERN_R; ky++)
+        for (kx = 0; kx < KERN_C; kx++)
+          if (feat_in(m, r*KERN_R+ky, c*KERN_C+kx) > max)
+            max = feat_in(m, r*KERN_R+ky, c*KERN_C+kx);
+      feat_out(m, r, c) = max;
+    }
+```
+
+<center>图1-13 最大池化操作的伪代码</center>
+
+&emsp;&emsp;池化操作较为简单，运算量较小，而卷积操作往往占据神经网络中90%以上的计算量。因此，本实验主要围绕卷积运算的量化来展开。
+
+## 3. 神经网络的量化
+
+### 3.1 量化的必要性
+
+&emsp;&emsp;深度学习已被证明在图像分类（Image Classification）、目标检测（Object Detection）、自然语言处理（Natural Language Processing）等任务上具有很好的效果。大量应用程序都配备了图像/计算机视觉相关的深度学习算法，如Animoji。
+
+&emsp;&emsp;虽然深度学习网络模型预测的准确度越来越高，但随着网络深度越来越大、参数越来越多，神经网络除了消耗越来越多的算力之外，其占用的存储资源也越来越多，如图1-14所示。
+
+<center><img src="../assets/1-14.jpg" width = 350></center>
+<center>图1-14 常见网络模型的大小及其性能</center>
+
+&emsp;&emsp;若想在移动设备和嵌入式设备上运行深度学习神经网络，如此庞大的网络参数将对移动设备的运行内存和总线带宽资源造成巨大消耗。例如，
+若想要网络处理实时视频数据，则每秒至少需要输入30帧图片到网络当中。即使部署的是较小的网络（如ResNet-50），模型运行时也需要占用3GB/s的总线带宽资源。
+
+&emsp;&emsp;为了解决深度学习模型占用设备过多存储、带宽资源的问题，近年来学术界和工业界主要从以下三个方向入手展开研究和探索：
+
+&emsp;&emsp;1）研究新型的轻量级网络或微型网络：设计更高效的新型网络架构，用相对较小的网络模型  
+&emsp;&emsp;达到可接收的预测准确度（如MobileNet和SequeezeNet等）；
+
+&emsp;&emsp;2）研究现有网络的参数缩减：如网络剪枝、参数量化等；
+
+&emsp;&emsp;3）研究新型计算模型、体系结构和计算部件：如内存中计算（In-Memory Computing或  
+&emsp;&emsp;Processing In Memory, PIM）、忆阻器（ReRAM）等。
+
+&emsp;&emsp;量化一般指的是使用较低精度的数字格式来表示神经网络中的浮点参数。本实验的主要内容之一就是网络参数的量化。
+
+### 3.2 量化方法简介
+
+&emsp;&emsp;大多数网络模型都采用32位浮点数（FP32）来存储网络参数。如果改用较低精度的16位浮点数（FP16）来存储网络参数，那么网络模型就可以减小一半。
+
+&emsp;&emsp;常用的低精度表示方法有16位定点数（INT16）、8位定点数（INT8）、4位定点数（INT4）、二进制（INT1）等。其中，使用INT1量化的网络称为二元神经网络（Binary Neural Network, BNN）。
+
+&emsp;&emsp;根据网络参数到特定位宽定点数的映射类型，可将量化策略可分为线性量化和非线性量化两种。线性量化策略将所有的网络参数线性映射到特定量化精度的数据范围中。例如，如果某神经网络的参数值在[0.05, 12]范围内，假设采用INT8的线性量化策略，那么区间[0.05, 12]将被线性映射到[0, 255]。非线性策略则根据神经网络的参数密度，在线性量化策略的基础上进行调整。与线性量化策略相比，非线性量化策略能够将网络参数更均匀地映射到定点数区间，因此其量化效果较好，对预测精度的影响较小。
+
+&emsp;&emsp;此外，根据量化后的网络参数是否关于坐标轴原点对称，可将量化策略分为对称量化和非对称量化两种。对称量化策略将网络参数映射到关于坐标原点对称的区间。例如，假设网络参数的取值范围是[-3, 6]，若采用INT8的对称量化策略，则[-3, 6]将被映射到[-127, 127]。非对称量化允许将网络参数映射到不对称的区间。与对称量化策略相比，非对称量化策略能够将网络参数更均匀地映射到定点数区间，因此其量化效果较好，对预测精度的影响较小。
+
+&emsp;&emsp;由于量化降低了网络参数的精度，因此量化后，网络的预测精度通常也会随之下降（少数情况下精度保持甚至提高）。不同量化精度和策略造成的预测精度损失不同，如图1-15所示。
+
+<center><img src="../assets/1-15.png"></center>
+<center>图1-15 不同量化精度和策略造成的精度损失对比</center>
+
+&emsp;&emsp;图1-15的纵坐标表示量化后的预测精度损失，横坐标表示采用了不同量化策略和量化精度的几个常见网络。由图1-15可知，当量化精度低于INT8时，量化后网络的精度急剧下降。因此，工业界目前普遍采用INT8的量化精度。
+
+&emsp;&emsp;引入量化后，可在网络训练时采用FP32以保证预测精度，而在前向推导时可将网络参数转换成INT8，从而减小运行时的网络规模。
+
+#### 3.2.1 线性对称量化方法
+
+&emsp;&emsp;首先介绍如图1-16所示的INT8线性对称量化方法：首先找出每个网络层中参数取值区间端点绝对值的最大值MAX，然后将网络参数所在的[-MAX, MAX]的区间线性映射到[-127, 127]。
+
+!!! example "举个栗子 :chestnut:"
+    &emsp;&emsp;假设某个网络层的参数在[-3, 6]的范围内，则MAX取值为6。将[-6, 6]线性映射到[-127, 127]，则6可用127表示，-3可用-63表示。如此便可将网络参数的大小缩小75%。
+
+<center><img src="../assets/1-16.jpg" width = 300></center>
+<center>图1-16 线性对称量化方法图示</center>
+
+&emsp;&emsp;INT8线性对称量化的步骤如下：
+
+&emsp;&emsp;*Step1*: 计算参数所在区间[a, b]的端点a、b绝对值的最大值，即计算MAX=max{|a|, |b|}；
+
+&emsp;&emsp;*Step2*: 计算缩放因子$Δ=127/MAX$；
+
+&emsp;&emsp;*Step3*: 将每一个网络参数都乘以因子$Δ$，从而将原始的网络参数映射到[-127, 127]之间的8位  
+&emsp;&emsp;定点整数。
+
+&emsp;&emsp;将量化后的参数导入硬件加速IP核进行前向推导计算，此时得到的计算结果也是INT8的数据类型。在输出前，需要对计算结果进行去量化/反量化，从而将INT8格式的输出结果转换成FP32格式，这样才能还原出原本无量化网络前向推导时的结果。
+
+&emsp;&emsp;对于定点量化的乘法运算，其去量化的步骤如下：
+
+&emsp;&emsp;*Step1*: 计算乘数和被乘数的量化缩放因子$Δ_1$和$Δ_2$；
+
+&emsp;&emsp;*Step2*: 计算输出特征图的缩放因子$Δ_o=Δ_1∙Δ_2$；
+
+&emsp;&emsp;*Step3*: 将输出特征图的每一个分量都除以因子$Δ_o$，得到去量化后的FP32格式的数据。
+
+&emsp;&emsp;显然，线性对称的量化方法适用于网络参数<font color = lightseagreen>**关于原点高度对称**</font>的场景。否则，量化后的数据将存在较为严重的精度丢失。
+
+&emsp;&emsp;为了将参数更均匀地映射到量化区间，以获得更好的量化效果，可以根据网络参数的分布情况对量化区间的端点进行调整，如图1-17所示。
+
+<center><img src="../assets/1-17.jpg" width = 280></center>
+<center>图1-17 截断的线性对称量化方法图示</center>
+
+&emsp;&emsp;图1-17是在图1-16的基础上，截断左侧的少部分参数之后所得到的INT8线性对称量化方法。此时，落在图中[-T, T]区间外的参数将使用区间端点所对应的定点数来表示。
+
+!!! example "栗子+1 :chestnut:"
+    &emsp;&emsp;假设网络参数的取值范围是[-3, 6]，但绝大部分参数都落在了[-3, 2.1]的区间内。为了能将参数均匀地分散到256个子区间，以获得更好的量化效果，可以将MAX的值从6调整为max{|-3|, 2.1}=3以截断[-3, 3]之外的参数，即将包含绝大部分参数的区间[-3, 3]线性映射到[-127, 127]，而区间(3, 6]内的参数则统一使用127来表示。
+
+#### 3.2.2 线性非对称量化方法
+
+&emsp;&emsp;图1-17所示的截断的线性对称量化方法要求数据所在区间仍然具有一定的原点对称性。当数据区间几乎不具有或完全不具有原点对称性时，一种值得尝试的方法是先平移区间再进行量化，另外一种方法则是采用线性非对称量化方法。
+
+&emsp;&emsp;INT8线性非对称量化的步骤如下：
+
+&emsp;&emsp;*Step1*: 计算参数所在区间[a, b]的端点a、b；
+
+&emsp;&emsp;*Step2*: 计算缩放因子$Δ=256/(b-a)$；
+
+&emsp;&emsp;*Step3*: 将每一个网络参数减去左端点$a$后再乘以因子$Δ$，从而将原始的网络参数映射到[0, 255]  
+&emsp;&emsp;之间的8位定点整数。
+
+!!! question "想一想 :information_desk_person:"
+    &emsp;&emsp;若将2个数据通过线性非对称量化方法进行乘法运算，则乘积如何反量化？
+
+### 3.3 量化的优缺点分析
+
+&emsp;&emsp;运用浮点数量化的方法，可以大大降低模型对存储和带宽的需求与压力，但量化存在一定的开销（Overhead）—— 推导前，需要进行额外的浮点数据量化处理；推导后、生成预测结果前，需要对量化后的定点数进行反量化/去量化（即还原成FP32浮点数），如图1-18所示。
+
+<center><img src="../assets/1-18.png" width = 650></center>
+<center>图1-18 量化（Quantize）与去量化（Dequantize）</center>
+
+&emsp;&emsp;此外，量化只能减轻模型运行时对存储和带宽的依赖，并不能直接带来网络前向推导的加速效果，并且通常会造成模型预测精度的降低。
+
+
+
+## 4. HLS优化
+
+&emsp;&emsp;**延迟**（Latency）和 **吞吐量**（Throughput）是电路设计中常用的2个性能指标。延迟指的是从输入数据到输出结果之间的耗时，而吞吐量则是2次输出结果之间的时间差。
+
+!!! example "栗子++ :chestnut:"
+    &emsp;&emsp;假设某流水线电路的时空图如图1-19所示，则其延迟为6个时钟周期，吞吐量为2个时钟周期。
+
+    <center><img src="../assets/1-19.png" width = 550></center>
+    <center>图1-19 某流水线电路时空图</center>
+
+&emsp;&emsp;以下将分别针对延迟和吞吐量两个指标，对常用的HLS优化方法进行介绍。更详细、更全面的优化方法请参考[Xilinx官网](https://www.xilinx.com/html_docs/xilinx2019_1/sdsoc_doc/hls-pragmas-okr1504034364623.html#fde1504034360078)。
+
+
+### 4.1 延迟优化
+
+&emsp;&emsp;Vivado HLS的默认策略是通过分析代码，生成延迟尽可能低的RTL电路，但所生成的电路通常还具有较大的优化空间。
+
+#### 4.1.1 降低单个循环的延迟
+
+&emsp;&emsp;循环是代码中最常见的结构之一，如何降低循环的延迟显然是延迟优化的关键问题。在HLS中，可采用以下2种方法减少单个循环的延迟：
+
+&emsp;&emsp;:one: **循环展开（Unroll）**
+
+&emsp;&emsp;HLS使用一个硬件模块实现循环体。如果循环语句的循环次数为n，则该硬件模块将被执行n次。假如现在每次循环执行m次循环体，那么完成相同的功能只需要n/m次，这就是循环展开的基本思想。循环展开的本质是牺牲更多的资源来换取加速效果。
+
+&emsp;&emsp;在HLS中，可使用`#pragma HLS UNROLL factor=<int>`的制导语句来告诉编译器哪个地方需要做循环展开。其中，参数`factor`用于指示循环体应该被复制多少次。当某个循环被展开了m次后，HLS编译器将生成m个硬件模块并行执行。
+
+!!! example "栗子Again :chestnut:"
+    &emsp;&emsp;使用HLS Directive对下列程序进行`factor`为2的展开：
+
+    ``` C++
+    for (int i = 0; i < X; i++)
+    {  
+    #pragma HLS unroll factor=2  
+        a[i] = b[i] + c[i];  
+    }
+    ```
+
+    &emsp;&emsp;上述代码等效于：
+
+    ``` C++
+    for (int i = 0; i < X; i += 2)
+    {  
+        a[i] = b[i] + c[i];  
+        if (i+1 >= X) break;  
+        a[i+1] = b[i+1] + c[i+1];  
+    }
+    ```
+
+    &emsp;&emsp;需要注意的是，上述代码中的if语句不会生成对应的电路，此处仅仅是为了保证逻辑的正确性。
+
+    &emsp;&emsp;对于软件来说，上述代码会比原代码更快 —— **不仅减少了指令预测执行的预测失败次数，还减少了循环过渡时的条件判断和计数器更新次数**；对于硬件来说，上述代码会生成2个可并行执行的加法器，理论性能翻倍，但资源消耗也相应增加。
+
+&emsp;&emsp;循环展开的一种简单的实现方法是直接使用`#pragma HLS UNROLL`来实现循环的完全展开，即如果循环次数为X，那么HLS编译器将会对循环体展开X次。显然，该用法要求循环边界是常数。需要注意的是，当循环次数较大时，完全展开将消耗大量的资源，从而可能导致展开失败。此时，需要根据芯片的实际资源数量，结合报错信息或综合报告，对展开次数进行合理的调整。
+
+&emsp;&emsp;:two: **循环展平（Flatten）**
+
+&emsp;&emsp;上文介绍循环展开时提到，减少循环过渡时的条件判断和计数器更新次数，可以减少循环的延迟，从而提高性能，循环展平的基本原理也是如此。所谓循环展平，指的是将嵌套循环（Nested Loop）的内层循环合并到外层循环之上。
+
+&emsp;&emsp;在HLS中，可使用`#pragma HLS loop_flatten`的制导语句来告诉编译器哪个循环需要展平。
+
+!!! example "More栗子 :chestnut:"
+    &emsp;&emsp;使用HLS Directive对下列嵌套循环进行展平：
+
+    ``` C++
+    for (int i = 0; i < M; i++)
+        for (int j = 0; j < N; j++)
+        {
+    #pragma HLS loop_flatten
+            // Loop body
+        }
+    }
+    ```
+
+    &emsp;&emsp;上述代码等效于：
+
+    ``` C++
+    for (int i = 0; i < M*N; i++)
+        // Loop body
+    ```
+
+&emsp;&emsp;有时HLS编译器也会根据情况自动展平内层循环。如果想维持循环的嵌套关系，可使用`#pragma HLS loop_flatten off`防止编译器展平。
+
+!!! warning "注意事项 :loudspeaker:"
+    &emsp;&emsp;循环展平要求嵌套循环必须是 **完美循环**（Perfect Loop）或 **半完美循环**（Semi-Perfect Loop） —— 完美循环指的是循环的边界是常数，且循环体只出现在最内层循环；半完美循环允许外循环的边界是变量，但内循环边界必须是常数，且循环体同样只能出现在最内层循环。
+
+    &emsp;&emsp;PS：为了降低延迟，可将其他类型的循环改写成完美循环或半完美循环。
+
+#### 4.1.2 多个循环的并行化
+
+&emsp;&emsp;默认情况下，若代码中存在多个循环，则在生成的RTL电路中，这些循环对应的电路也将顺序执行。为了使得多个循环能够尽可能地并行执行，从而降低延迟，可采用以下3种优化方法：
+
+&emsp;&emsp;:one: **循环合并**
+
+&emsp;&emsp;多个循环即使相互之间完全独立，在RTL中默认也要按顺序执行。为此，当循环的 **边界相同**，且循环之间 **不存在依赖关系** 时，可将其合并成单个循环。
+
+&emsp;&emsp;在HLS中，可使用`#pragma HLS loop_merge`的制导语句自动完成循环的合并。
+
+!!! example "栗子Again&again :chestnut:"
+    &emsp;&emsp;使用HLS Directive对下列程序进行循环的自动合并：
+
+    ``` C++
+    void func (...) {
+    #pragma HLS loop_merge
+        L1: for (int i = 0; i < 8; i++) {
+            // Loop body of L1
+
+        L2: for (int i = 0; i < 4; i++)
+            L3: for (int j = 0; j < 5; j++)
+                // Loop body of L3
+
+        L4: for (int i = 0; i < 13; i++)
+            // Loop body of L4
+    }
+    ```
+
+    &emsp;&emsp;上述代码等效于：
+
+    ``` C++
+    void func (...) {
+        MERGED: for (int i = 0; i < 20; i++) {
+            if (/* condition1 */)
+                // Loop body of L1
+            
+            // Flattened loop body of L3
+
+            if (/* condition4 */)
+                // Loop body of L4
+        }
+    }
+    ```
+
+    &emsp;&emsp;需要注意的是，循环`L2`和`L3`是完美循环，将被HLS编译器自动展平。
+
+!!! warning "注意事项 :loudspeaker:"
+    &emsp;&emsp;循环合并的使用应遵循下列规则：  
+    &emsp;&emsp;1. 若合并前所有循环的边界都是常数，则合并后的循环边界应取合并前的最大值；  
+    &emsp;&emsp;2. 若合并前所有循环的边界都是变量，则这些循环的边界必须相同；  
+    &emsp;&emsp;3. 若部分循环的边界是常数，部分是变量，则不能合并；  
+    &emsp;&emsp;4. 若在合并前的所有循环当中，存在多个循环读取同一个FIFO缓存，则必须保证FIFO中的数据是按顺序读取的，否则不能合并。
+
+&emsp;&emsp;:two: **循环函数化**
+
+&emsp;&emsp;如果2个循环的边界不同，则不能合并。此时，可将单个循环封装成子函数，从而可以通过子函数之间的并行执行来达到循环并行执行的目的。
+
+!!! example "吃栗子吃到饱 :chestnut:"
+    &emsp;&emsp;假设有程序如下：
+
+    ``` C++
+    void func (int A[N], int B[N], int X[N], int Y[N], int xlimit, int ylimit) {
+        int X_acc = 0, Y_acc = 0;
+
+        SUM_X: for (int i = 0; i < xlimit; i++) {
+            X_acc += A[i];
+            X[i] = X_acc;
+        }
+
+        SUM_Y: for (int i = 0; i < ylimit; i++) {
+            Y_acc += B[i];
+            Y[i] = Y_acc;
+        }
+    }
+    ```
+    
+    &emsp;&emsp;上述程序含有2个分别名为`SUM_X`和`SUM_Y`的循环。这2个循环具有不同的边界，因此不能合并，但可将循环封装成子函数，从而实现并行：
+
+    ``` C++
+    void sub_func(int I[N], int O[N], int limit) {
+    #pragma HLS inline off          // 防止内联
+        int acc = 0;
+
+        SUM: for (int i = 0; i < limit; i++) {
+            acc += I[i];
+            O[i] = acc;
+        }
+    }
+
+    void func (int A[N], int B[N], int X[N], int Y[N], int limit) {
+        sub_func(A, X, xlimit);
+        sub_func(B, Y, ylimit);
+    }
+    ```
+
+    &emsp;&emsp;需要注意的是，子函数`sub_func`必须使用`#pragma HLS inline off`的制导语句来防止内联 —— 子函数`sub_func`内联后，代码将与优化前一致，无法实现2个循环的并行。
+
+&emsp;&emsp;:three: **数据流执行（Dataflow）**
+
+&emsp;&emsp;当2个循环之间存在数据依赖时，不管是循环合并还是将其封装成子函数，都不能改变原有的数据依赖关系，这意味着上述两种方法都不能实现循环之间的并行化。此时，可使用数据流方式实现并行。
+
+&emsp;&emsp;在HLS中，可使用`#pragma HLS dataflow`的制导语句来实现数据流执行方式。
+
+!!! example "吃不完的栗子 :chestnut:"
+    &emsp;&emsp;在下列程序中，`LOOP_1`和`LOOP_2`具有数据依赖关系，可通过HLS Directive实现循环的并行化：
+
+    ``` C++
+    void func (int A[N], int C[N], int num) {
+    #pragma HLS dataflow
+        int acc = 0;
+        int B[N];
+
+        LOOP_1: for (int i = 0; i < N; i++) {
+    #pragma HLS PIPELINE II=1
+            acc += A[i];
+            B[i] = acc;
+        }
+
+        LOOP_2: for (int i = 0; i < N; i++)
+    #pragma HLS PIPELINE II=1
+            C[i] = B[N - 1 - i] * num;
+    }
+    ```
+    注：`#pragma HLS PIPELINE II=1`表示流水线优化，详见4.2.1小节。
+
+&emsp;&emsp;Vivado HLS默认采用非数据流执行方式，即后面的循环必须等待前面的循环整个执行完成才能执行。现在，尝试站在硬件的角度思考。为了便于理解，不妨将上述例子中的`LOOP_1`和`LOOP_2`当作Verilog的2个module。理想情况下，`A[i]`先流入`LOOP_1`，然后`B[i]`计算完成后从`LOOP_1`流出到`LOOP_2`，同时`A[i+1]`流入`LOOP_1`；`LOOP_2`接收到`B[i]`后可立即开始计算`C[i]`；`C[i]`计算完成后流出`LOOP_2`。从数据的视角来看，程序的执行就是数据不断地流入`LOOP_1`，并从`LOOP_2`流出的过程。
+
+&emsp;&emsp;为了实现数据流，HLS工具将在函数（或循环）之间添加缓存。一般地，如果函数（或循环）之间依靠单独的变量传递数据，则HLS会在其中添加FIFO缓存；如果依靠数组传递数据，则添加乒乓缓存。
+
+!!! warning "注意事项 :loudspeaker:"
+    &emsp;&emsp;数据流是一种降低延迟和提高吞吐量的有效方法，但存在如下 **使用限制**：  
+    &emsp;&emsp;1. 数据必须在函数（或循环）之间顺序流动，不能有反馈回路，也不能绕过中间的函数（或循环）向后流动；  
+    &emsp;&emsp;2. 一个函数（或循环）流出的数据，只能流入到另一个函数（或循环），即`single-producer, single-consumer`；  
+    &emsp;&emsp;3. 函数（或循环）不能包含在条件语句当中；  
+    &emsp;&emsp;4. 函数（或循环）不能具有多个出口。
+
+
+### 4.2 吞吐量优化
+
+&emsp;&emsp;在HLS中，提高吞吐量的基本方法是使用流水线技术。根据流水线粒度的粗细，可将吞吐量优化方法分为循环/函数流水和数据流2种。
+
+#### 4.2.1 循环/函数流水线
+
+&emsp;&emsp;流水线是一种常用的利用时间重叠原理提高处理器性能的并行优化方法，如图1-20所示。示例程序的循环体含有读数据、计算和写数据3个操作。假设使用HLS将该循环体综合成硬件后，循环体中的每个操作都需要一个时钟周期的时延。若循环体需要循环n次，则图1-20(A)所示的串行执行方式总共需要3n个时钟周期，吞吐量为3个周期；而图1-20(B)所示的流水线执行方式只需要n+2个时钟周期，吞吐量为1个周期。
+
+<center><img src="../assets/1-20.png" width = 700></center>
+<center>图1-20 流水线优化示例图</center>
+
+&emsp;&emsp;在HLS中，可使用`#pragma HLS PIPELINE II=<int>`的制导语句来实现流水线优化。其中，参数`II`代表流水线的启动时延/发射时延（Initiation Interval）。默认情况下，`II`取值为1，表示每个时钟周期启动一次流水线。显然，`II`取1时性能最佳。实际上，代码中可能存在数据依赖关系或延迟较大的操作，导致流水线无法实现1个时钟周期的启动时延。因此，在实际生成的电路中，流水线的启动时延可能比参数`II`所设定的值更大。
+
+&emsp;&emsp;语句`#pragma HLS PIPELINE II=<int>`既可作用于嵌套循环，也可作用于整个函数。若作用于嵌套循环的外层循环，则HLS编译器将对pragma语句之下的所有内层循环进行完全展开。此时，若内层循环的边界为变量，或展开后将耗尽片上资源，则展开失败，从而导致不能满足设定的`II`。类似地，若作用于整个函数，则HLS将对函数内的所有循环进行完全展开，同样存在展开失败的可能。
+
+!!! info "补充说明 :mega:"
+    &emsp;&emsp;当流水线存在数据依赖，或访问存储器（即数组）出现结构冲突时，也会导致不能满足设定的`II`。此时，需要进行相应的优化（如消除依赖关系、使用数组划分等方法解决结构冲突等）。
+
+#### 4.2.2 数据流
+
+&emsp;&emsp;数据流优化不仅能降低延迟（见4.1.2小节），还能提高吞吐量。上一小节介绍的循环/函数流水线可以实现细粒度的流水线架构（如运算符级别的流水线），而数据流则可以实现循环级或函数级的粗粒度流水线。
+
+
+### 4.3 优化调试
+
+&emsp;&emsp;制导语句又称指导语句，其作用是给编译器提供优化方向或优化建议。开发者在代码中插入制导语句后，编译器会根据 **实际情况**，按照所提供的优化建议，尝试对代码设计进行优化。如果设计不满足优化条件或出现无效优化的情况，编译器要么忽略相应的制导语句，要么只进行一部分优化，或是直接报错。
+
+&emsp;&emsp;插入制导语句不会影响代码的功能，因此优化前后CSim的仿真结果应当维持不变。若优化前，设计已经通过了CSim，则优化后可直接进行综合。
+
+&emsp;&emsp;综合结束后，一种情况是HLS会在下方的控制台中输出报错信息，如图1-21所示。
+
+<center><img src="../assets/1-21.png"></center>
+<center>图1-21 优化后综合报错</center>
+
+&emsp;&emsp;此时说明所添加的制导语句不能被实现，需要删除之。例如进行了不合理的循环展开，而芯片资源无法满足展开，进而报错。
+
+&emsp;&emsp;第二种情况是HLS根据制导语句执行了优化操作，但优化效果无法达到预期。此时，HLS将在综合报告中以红色字体报警，如图1-22所示。
+
+<center><img src="../assets/1-22.png" width = 700></center>
+<center>图1-22 综合报告报警</center>
+
+&emsp;&emsp;此时说明制导语句的优化参数设置不合理，需要进行调整，比如降低循环展开`factor`、增加流水线`II`或者对代码进行合理的分割及其他优化。
+
+!!! info "补充说明 :mega:"
+    &emsp;&emsp;对于图1-22中的Timing报警，可以通过HLS的分析功能找到时序违例，如图1-23所示。
+
+    <center><img src="../assets/1-23.png" width = 650></center>
+    <center>图1-23 查看时序违例</center>
+
+    &emsp;&emsp;按照图1-23找到违例所对应的代码，通过分析，采取合理的优化措施。若是以优化性能为首要目标，则需要考虑如何分割计算任务，以减小时延，从而消除违例；若是以保证正确性为首要目标，则需要降低相应的优化期望和优化目标。
+
+    &emsp;&emsp;一般地，需要修正所有的违例，但有时存在这样的情况：综合报告中没有任何报警，但图1-23所示的Analysis视图中仍然有违例。此时可暂时忽略这些违例，继续进行后续的开发，直到违例导致了错误结果的产生。
+
+&emsp;&emsp;第三种情况是，虽然插入了制导语句，但从综合报告来看，优化前后没有任何效果。此时说明所作优化不合理，因而被HLS编译器忽略。该情形下，需要重新分析代码，在必要的地方插入优化语句。

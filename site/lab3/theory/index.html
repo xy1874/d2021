@@ -1,0 +1,1398 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-7.3.6">
+    
+    
+      
+        <title>实验原理 - 深度学习体系结构（2021秋季） | 哈工大（深圳）</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.a57b2b03.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.3f5d1f46.min.css">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+      <link rel="stylesheet" href="../../theme.css">
+    
+    
+      
+
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    <script>function __prefix(e){return new URL("../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#_1" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="深度学习体系结构（2021秋季） | 哈工大（深圳）" class="md-header__button md-logo" aria-label="深度学习体系结构（2021秋季） | 哈工大（深圳）" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M416 48v416c0 26.51-21.49 48-48 48H144c-26.51 0-48-21.49-48-48V48c0-26.51 21.49-48 48-48h224c26.51 0 48 21.49 48 48zm96 58v12a6 6 0 0 1-6 6h-18v6a6 6 0 0 1-6 6h-42V88h42a6 6 0 0 1 6 6v6h18a6 6 0 0 1 6 6zm0 96v12a6 6 0 0 1-6 6h-18v6a6 6 0 0 1-6 6h-42v-48h42a6 6 0 0 1 6 6v6h18a6 6 0 0 1 6 6zm0 96v12a6 6 0 0 1-6 6h-18v6a6 6 0 0 1-6 6h-42v-48h42a6 6 0 0 1 6 6v6h18a6 6 0 0 1 6 6zm0 96v12a6 6 0 0 1-6 6h-18v6a6 6 0 0 1-6 6h-42v-48h42a6 6 0 0 1 6 6v6h18a6 6 0 0 1 6 6zM30 376h42v48H30a6 6 0 0 1-6-6v-6H6a6 6 0 0 1-6-6v-12a6 6 0 0 1 6-6h18v-6a6 6 0 0 1 6-6zm0-96h42v48H30a6 6 0 0 1-6-6v-6H6a6 6 0 0 1-6-6v-12a6 6 0 0 1 6-6h18v-6a6 6 0 0 1 6-6zm0-96h42v48H30a6 6 0 0 1-6-6v-6H6a6 6 0 0 1-6-6v-12a6 6 0 0 1 6-6h18v-6a6 6 0 0 1 6-6zm0-96h42v48H30a6 6 0 0 1-6-6v-6H6a6 6 0 0 1-6-6v-12a6 6 0 0 1 6-6h18v-6a6 6 0 0 1 6-6z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            深度学习体系结构（2021秋季） | 哈工大（深圳）
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              实验原理
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://gitee.com/hitsz-cslab/dla" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    HITSZ-Course-DLA
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        首页
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../lab1/overview/" class="md-tabs__link">
+        实验1：神经网络加速器设计入门
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../lab2/overview/" class="md-tabs__link">
+        实验2：YOLO算法量化加速
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../overview/" class="md-tabs__link md-tabs__link--active">
+        实验3：基于LSTM的MNIST手写数字识别加速
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../lab4/overview/" class="md-tabs__link">
+        实验4：基于脉动阵列的CNN加速
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="深度学习体系结构（2021秋季） | 哈工大（深圳）" class="md-nav__button md-logo" aria-label="深度学习体系结构（2021秋季） | 哈工大（深圳）" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M416 48v416c0 26.51-21.49 48-48 48H144c-26.51 0-48-21.49-48-48V48c0-26.51 21.49-48 48-48h224c26.51 0 48 21.49 48 48zm96 58v12a6 6 0 0 1-6 6h-18v6a6 6 0 0 1-6 6h-42V88h42a6 6 0 0 1 6 6v6h18a6 6 0 0 1 6 6zm0 96v12a6 6 0 0 1-6 6h-18v6a6 6 0 0 1-6 6h-42v-48h42a6 6 0 0 1 6 6v6h18a6 6 0 0 1 6 6zm0 96v12a6 6 0 0 1-6 6h-18v6a6 6 0 0 1-6 6h-42v-48h42a6 6 0 0 1 6 6v6h18a6 6 0 0 1 6 6zm0 96v12a6 6 0 0 1-6 6h-18v6a6 6 0 0 1-6 6h-42v-48h42a6 6 0 0 1 6 6v6h18a6 6 0 0 1 6 6zM30 376h42v48H30a6 6 0 0 1-6-6v-6H6a6 6 0 0 1-6-6v-12a6 6 0 0 1 6-6h18v-6a6 6 0 0 1 6-6zm0-96h42v48H30a6 6 0 0 1-6-6v-6H6a6 6 0 0 1-6-6v-12a6 6 0 0 1 6-6h18v-6a6 6 0 0 1 6-6zm0-96h42v48H30a6 6 0 0 1-6-6v-6H6a6 6 0 0 1-6-6v-12a6 6 0 0 1 6-6h18v-6a6 6 0 0 1 6-6zm0-96h42v48H30a6 6 0 0 1-6-6v-6H6a6 6 0 0 1-6-6v-12a6 6 0 0 1 6-6h18v-6a6 6 0 0 1 6-6z"/></svg>
+
+    </a>
+    深度学习体系结构（2021秋季） | 哈工大（深圳）
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://gitee.com/hitsz-cslab/dla" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    HITSZ-Course-DLA
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1">
+          首页
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="首页" data-md-level="1">
+        <label class="md-nav__title" for="__nav_1">
+          <span class="md-nav__icon md-icon"></span>
+          首页
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        实验须知
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ojguide/" class="md-nav__link">
+        作业提交说明
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../vivadodl/" class="md-nav__link">
+        Vivado下载链接
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          实验1：神经网络加速器设计入门
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="实验1：神经网络加速器设计入门" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          实验1：神经网络加速器设计入门
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../lab1/overview/" class="md-nav__link">
+        实验概述
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../lab1/theory/" class="md-nav__link">
+        实验原理
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../lab1/step/" class="md-nav__link">
+        实验步骤
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../lab1/submit/" class="md-nav__link">
+        验收与提交
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_5" type="checkbox" id="__nav_2_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_5">
+          附录
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="附录" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_5">
+          <span class="md-nav__icon md-icon"></span>
+          附录
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../lab1/appendix1/" class="md-nav__link">
+        1. PYNQ-Z2上手指南
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../lab1/appendix2/" class="md-nav__link">
+        2. Jupyter Notebook简介
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          实验2：YOLO算法量化加速
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="实验2：YOLO算法量化加速" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          实验2：YOLO算法量化加速
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../lab2/overview/" class="md-nav__link">
+        实验概述
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../lab2/theory/" class="md-nav__link">
+        实验原理
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../lab2/step/" class="md-nav__link">
+        实验步骤
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../lab2/extra/" class="md-nav__link">
+        附加题
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../lab2/submit/" class="md-nav__link">
+        验收与提交
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4">
+          实验3：基于LSTM的MNIST手写数字识别加速
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="实验3：基于LSTM的MNIST手写数字识别加速" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          实验3：基于LSTM的MNIST手写数字识别加速
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../overview/" class="md-nav__link">
+        实验概述
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          实验原理
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        实验原理
+      </a>
+      
+        
+
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-rnn" class="md-nav__link">
+    1. RNN简介
+  </a>
+  
+    <nav class="md-nav" aria-label="1. RNN简介">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-rnn" class="md-nav__link">
+    1.1 RNN原理简介
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-rnn" class="md-nav__link">
+    1.2 RNN的反向传播
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13" class="md-nav__link">
+    1.3 梯度消失与梯度爆炸问题
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-lstm" class="md-nav__link">
+    2. LSTM原理简述
+  </a>
+  
+    <nav class="md-nav" aria-label="2. LSTM原理简述">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#forget-gate" class="md-nav__link">
+    &clubs; 遗忘门（Forget Gate）
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#input-gate" class="md-nav__link">
+    &clubs; 输入门（Input Gate）
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output-gate" class="md-nav__link">
+    &clubs; 输出门（Output Gate）
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    &clubs; 状态产生逻辑
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    &clubs; 输出逻辑
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-lstm" class="md-nav__link">
+    3. 基于LSTM的手写数字识别
+  </a>
+  
+    <nav class="md-nav" aria-label="3. 基于LSTM的手写数字识别">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-mnist" class="md-nav__link">
+    3.1 MNIST手写数字数据集
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-lstm" class="md-nav__link">
+    3.2 LSTM识别手写数字
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-rnn" class="md-nav__link">
+    4. RNN加速器架构
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../step/" class="md-nav__link">
+        实验步骤
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../extra/" class="md-nav__link">
+        附加题
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../submit/" class="md-nav__link">
+        验收与提交
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          实验4：基于脉动阵列的CNN加速
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="实验4：基于脉动阵列的CNN加速" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          实验4：基于脉动阵列的CNN加速
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../lab4/overview/" class="md-nav__link">
+        实验概述
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../lab4/theory/" class="md-nav__link">
+        实验原理
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../lab4/step/" class="md-nav__link">
+        实验步骤
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../lab4/submit/" class="md-nav__link">
+        验收与提交
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-rnn" class="md-nav__link">
+    1. RNN简介
+  </a>
+  
+    <nav class="md-nav" aria-label="1. RNN简介">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-rnn" class="md-nav__link">
+    1.1 RNN原理简介
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-rnn" class="md-nav__link">
+    1.2 RNN的反向传播
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13" class="md-nav__link">
+    1.3 梯度消失与梯度爆炸问题
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-lstm" class="md-nav__link">
+    2. LSTM原理简述
+  </a>
+  
+    <nav class="md-nav" aria-label="2. LSTM原理简述">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#forget-gate" class="md-nav__link">
+    &clubs; 遗忘门（Forget Gate）
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#input-gate" class="md-nav__link">
+    &clubs; 输入门（Input Gate）
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output-gate" class="md-nav__link">
+    &clubs; 输出门（Output Gate）
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    &clubs; 状态产生逻辑
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    &clubs; 输出逻辑
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-lstm" class="md-nav__link">
+    3. 基于LSTM的手写数字识别
+  </a>
+  
+    <nav class="md-nav" aria-label="3. 基于LSTM的手写数字识别">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-mnist" class="md-nav__link">
+    3.1 MNIST手写数字数据集
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-lstm" class="md-nav__link">
+    3.2 LSTM识别手写数字
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-rnn" class="md-nav__link">
+    4. RNN加速器架构
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                
+                <h1 id="_1">实验原理</h1>
+<p>&emsp;&emsp;循环神经网络（Recurrent Neural Network, RNN）是一类专门用于处理序列型数据（如文本、语音等）的神经网络。传统的RNN因为梯度弥散等问题对长序列的预测结果不甚理想，各方学者对此展开了研究和优化。其中，最具代表性的就是长短期记忆（Long Short-Term Memory, LSTM）神经网络。接下来将从传统RNN到LSTM，介绍循环神经网络的基本原理和网络结构。</p>
+<h2 id="1-rnn">1. RNN简介</h2>
+<h3 id="11-rnn">1.1 RNN原理简介</h3>
+<p>&emsp;&emsp;假设有一个多层感知机（Multi-Layer Perceptron, MLP），现在将一个时间上连续的输入序列依次添加到MLP的每一个隐藏层，得到图1-1(a)所示的网络。此时，如果令所有隐藏层的权值和参数都相同，如图1-1(b)所示，则可以将所有隐藏层在时间上“折叠”起来，形成循环层，于是得到如图1-1(c)所示的循环神经网络。</p>
+<p><center><img src="../assets/1-1a.png" width = 250> <img src="../assets/1-1b.png" width = 250> <img src="../assets/1-1c.png" width = 130></center>
+<center>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;(a) MLP &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; (b) 隐藏层的参数都相同 &emsp;&emsp; (c) 形成循环层</center>
+<center>图1-1 从MLP到RNN</center></p>
+<p>&emsp;&emsp;图1-1(c)中的循环层也被称作是RNN的循环神经元或Cell。一般地，可用图1-2所示的结构来简化表示RNN的网络结构。</p>
+<p><center><img src="../assets/1-2.jpg" width = 180></center>
+<center>图1-2 RNN网络结构</center></p>
+<p>&emsp;&emsp;图1-2所示的RNN神经网络，其Cell所产生的输出随着输入的变化而变化。若输入随时间变化而变化，则Cell的输出也随着时间发生相应的变化。假设Cell在t时刻接收的输入是<script type="math/tex">\pmb x_t</script>，产生的输出是<script type="math/tex">\pmb h_t</script>，则可得式(1-1)所示的简单模型：</p>
+<p>
+<script type="math/tex; mode=display"> \pmb h_t = f(\pmb h_{t-1}, \pmb x_t) \tag {1-1} </script>
+</p>
+<p>&emsp;&emsp;其中，<script type="math/tex">\pmb h_{t-1}</script>是Cell在上一个时刻的输出。</p>
+<p>&emsp;&emsp;进一步地，假设输入<script type="math/tex">\pmb h_{t-1}</script>的权值是<script type="math/tex">\pmb W_{hh}</script>、输入<script type="math/tex">\pmb x_t</script>的权值是<script type="math/tex">\pmb W_{xh}</script>，偏置量是<script type="math/tex">\pmb b</script>，激活函数记为activation()，则可将式(1-1)改写为式(1-2)：</p>
+<p>
+<script type="math/tex; mode=display"> \pmb h_t = activation(\pmb W_{hh}∙\pmb h_{t-1} + \pmb W_{xh} ∙ \pmb x_t + \pmb b) \tag {1-2} </script>
+</p>
+<p>&emsp;&emsp;输入结束后，RNN网络也随之计算得出最终的输出结果。假设Cell的输出<script type="math/tex">\pmb h_t</script>的权值是<script type="math/tex">\pmb W_{hy}</script>，则RNN的输出<script type="math/tex">\pmb y_t</script>如式(1-3)所示。</p>
+<p>
+<script type="math/tex; mode=display"> \pmb y_t = \pmb W_{hy} ∙ \pmb h_t \tag {1-3} </script>
+</p>
+<p>&emsp;&emsp;总结RNN的计算步骤如下：</p>
+<p>&emsp;&emsp;Step1: 将待预测数据<script type="math/tex">\pmb x_t</script>输入到RNN网络当中；</p>
+<p>&emsp;&emsp;Step2: 基于式(1-2)，利用输入<script type="math/tex">\pmb x_t</script>和Cell在前一时刻的输出<script type="math/tex">\pmb h_{t-1}</script>，计算<script type="math/tex">\pmb h_t</script>；</p>
+<p>&emsp;&emsp;Step3: 若数据输入完毕，基于式(1-3)计算网络输出；否则，t=t+1，转Step1。</p>
+<h3 id="12-rnn">1.2 RNN的反向传播</h3>
+<p>&emsp;&emsp;为了方便理解RNN的通过时间的反向传播（Back Propagation Through Time, BPTT），首先将RNN展开，如图1-3所示。</p>
+<p><center><img src="../assets/1-3.jpg" width = 550></center>
+<center>图1-3 按时间对RNN进行展开</center></p>
+<p>&emsp;&emsp;将RNN展开后，图1-3右侧的每一个圆圈都代表了左侧的RNN Cell在不同时间节点的状态。</p>
+<p>&emsp;&emsp;前向传播时，RNN按照输入序列的内部顺序，在每个时间节点处读取并处理序列中的一个数据。反向传播时，需要反过来对各个时间节点上的网络权值进行更新，故而将RNN的反向传播称为通过时间的反向传播。</p>
+<p>&emsp;&emsp;假设<script type="math/tex">\pmb y_t</script>是RNN网络在t时刻输出的预测值，而<script type="math/tex">\pmb y ̂_t</script>是实际真实值，则可用交叉熵来计算误差，如式(1-4)所示。</p>
+<p>
+<script type="math/tex; mode=display"> \pmb E_t (\pmb y ̂_t, \pmb y_t ) = -\pmb y ̂_t log⁡(\pmb y_t) \tag {1-4} </script>
+</p>
+<p>&emsp;&emsp;将所有时间节点的误差进行累加，即可得到总体误差，如式(1-5)所示。</p>
+<p>
+<script type="math/tex; mode=display"> \pmb E(\pmb y ̂, \pmb y) = - \sum_{t} \pmb y ̂_t log⁡(\pmb y_t) \tag {1-5} </script>
+</p>
+<p>&emsp;&emsp;基于式(1-4)和式(1-5)，可将RNN的BPTT过程简述为：</p>
+<p>&emsp;&emsp;Step1: 基于式(1-5)所示的交叉熵公式计算误差；</p>
+<p>&emsp;&emsp;Step2: 将RNN按照时间节点完全展开；</p>
+<p>&emsp;&emsp;Step3: 计算展开后每个时间节点上Cell的网络权值梯度；</p>
+<p>&emsp;&emsp;Step4: 使用Step3计算得到的梯度更新Cell的权值。</p>
+<h3 id="13">1.3 梯度消失与梯度爆炸问题</h3>
+<p>&emsp;&emsp;RNN的原理使得其预测结果依赖于RNN Cell在所有时间节点上的状态。时间节点数越多，网络权值的更新越难。现在，考虑一个具有三个时间节点的RNN Cell，其网络权值梯度的计算需要使用链式求导，如式(1-6)所示。</p>
+<p>
+<script type="math/tex; mode=display"> \frac {∂\pmb E}{∂\pmb W} = \frac {∂\pmb E}{∂\pmb y_3} ∙ \frac {∂\pmb y_3}{∂\pmb h_3} ∙ \frac {∂\pmb h_3}{∂\pmb y_2} ∙ \frac {∂\pmb y_2}{∂\pmb h_1} \tag {1-6} </script>
+</p>
+<p>&emsp;&emsp;如果式(1-6)中存在某个接近0的乘积项，则计算出的所有梯度都会接近于0，而其他时间节点的梯度更是以指数速率降低为0，于是便出现了梯度消失问题，如图1-4所示。显然，梯度消失问题不利于RNN网络对较长输入序列的学习。</p>
+<p><center><img src="../assets/1-4.png" width = 650></center>
+<center>图1-4 梯度消失示意图</center></p>
+<p>&emsp;&emsp;类似地，梯度爆炸问题是梯度值因为时间节点增多而容易变得非常大的问题。一般地，可以通过设定阈值的方法解决梯度爆炸问题，因此对RNN的训练而言，如何解决梯度消失问题显得更为关键。</p>
+<p>&emsp;&emsp;为了解决梯度消失问题，Sepp Hochreiter和Ju ̈rgen Schmidhuber在1997年提出了<a href="https://www.mitpressjournals.org/doi/abs/10.1162/neco.1997.9.8.1735">LSTM</a>，为人工智能领域作出了教科书级的贡献。</p>
+<h2 id="2-lstm">2. LSTM原理简述</h2>
+<p>&emsp;&emsp;在图1-2所示的RNN网络结构中，Cell只能存储当前时刻的输出<script type="math/tex">\pmb h_t</script>，因而对短期的输入比较敏感。为了增加RNN对长期输入（或长序列输入）的预测效果，现在给Cell增加一个变量<script type="math/tex">\pmb C_t</script>，用于存储Cell的当前状态，并由此形成LSTM Cell，如图1-5所示。其中，<script type="math/tex">\pmb C_t</script>被称为单元状态（Cell State）。</p>
+<p><center><img src="../assets/1-5.png" width = 200></center>
+<center>图1-5 RNN Cell的改进</center></p>
+<p>&emsp;&emsp;同样地，可将图1-5所示的LSTM Cell按时间展开，得到如图1-6所示的结构。</p>
+<p><center><img src="../assets/1-6.png" width = 450></center>
+<center>图1-6 展开的LSTM Cell</center></p>
+<p>&emsp;&emsp;观察图1-6中时刻t所对应的LSTM Cell，可知在时刻t，Cell接受三个输入，分别是当前时刻的外部输入<script type="math/tex">\pmb x_t</script>、前一时刻的输出<script type="math/tex">\pmb h_{t-1}</script>与单元状态<script type="math/tex">\pmb C_{t-1}</script>；产生两个输出，分别是当前时刻的对外输出<script type="math/tex">\pmb h_t</script>与单元状态<script type="math/tex">\pmb C_t</script>。</p>
+<p>&emsp;&emsp;传统的RNN Cell只能存储当前时刻的输出<script type="math/tex">\pmb h_t</script>。LSTM Cell在RNN Cell的基础上增加了遗忘门、输入门、输出门等子结构，如图1-7所示。</p>
+<p><center><img src="../assets/1-7.png" width = 550></center>
+<center>(a) 传统RNN Cell的结构 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; (b) LSTM Cell的结构 &emsp;&emsp;&emsp;&emsp;&emsp;</center>
+<center>图1-7 RNN结构的演化</center></p>
+<p>&emsp;&emsp;接下来，逐一介绍LSTM Cell的遗忘门、输入门、输出门以及状态产生逻辑和输出逻辑，如图1-8所示。</p>
+<p><center><img src="../assets/1-8.png" width = 400></center>
+<center>图1-8 LSTM Cell结构组成</center></p>
+<h3 id="forget-gate">&clubs; 遗忘门（Forget Gate）</h3>
+<p>&emsp;&emsp;遗忘门的输入是<script type="math/tex">\pmb h_{t-1}</script>与<script type="math/tex">\pmb x_t</script>拼接后得到的向量<script type="math/tex">[\pmb h_{t-1}, \pmb x_t]</script>，输出<script type="math/tex">\pmb f_t</script>被称为遗忘门的输出控制向量，用于控制Cell对上一个单元状态<script type="math/tex">\pmb C_{t-1}</script>的遗忘程度。</p>
+<p>&emsp;&emsp;根据图1-8中的遗忘门结构，可得到遗忘门输出向量<script type="math/tex">\pmb f_t</script>的计算公式如式(1-7)所示。</p>
+<p>
+<script type="math/tex; mode=display"> \pmb f_t = sigmoid(\pmb W_f∙[\pmb h_{t-1}, \pmb x_t] + \pmb b_f) \tag {1-7} </script>
+</p>
+<p>&emsp;&emsp;其中，<script type="math/tex">\pmb W_f</script>和<script type="math/tex">\pmb b_f</script>分别是遗忘门的权值矩阵和偏置向量。</p>
+<h3 id="input-gate">&clubs; 输入门（Input Gate）</h3>
+<p>&emsp;&emsp;输入门的输入是<script type="math/tex">\pmb h_{t-1}</script>与<script type="math/tex">\pmb x_t</script>拼接后得到的向量<script type="math/tex">[\pmb h_{t-1}, \pmb x_t]</script>，输出<script type="math/tex">\pmb i_t</script>被称为输入门的输出控制向量，用于控制Cell的新状态的产生。</p>
+<p>&emsp;&emsp;根据图1-8中的输入门结构，可得到输入门输出向量<script type="math/tex">\pmb i_t</script>的计算公式如式(1-8)所示。</p>
+<p>
+<script type="math/tex; mode=display"> \pmb i_t = sigmoid(\pmb W_i∙[\pmb h_{t-1}, \pmb x_t] + \pmb b_i) \tag {1-8} </script>
+</p>
+<p>&emsp;&emsp;其中，<script type="math/tex">\pmb W_i</script>和<script type="math/tex">\pmb b_i</script>分别是输入门的权值矩阵和偏置向量。</p>
+<p>&emsp;&emsp;此外，输入门根据向量<script type="math/tex">[\pmb h_{t-1}, \pmb x_t]</script>产生候选状态向量<script type="math/tex">\pmb C ̃_t</script>，用于给Cell产生新的单元状态。</p>
+<p>&emsp;&emsp;根据图1-8中的输入门结构，可得到输入门产生的候选状态向量<script type="math/tex">\pmb C ̃_t</script>的计算公式如式(1-9)所示。</p>
+<p>
+<script type="math/tex; mode=display"> \pmb C ̃_t = tanh(\pmb W_C ∙ [\pmb h_{t-1}, \pmb x_t] + \pmb b_c) \tag {1-9} </script>
+</p>
+<p>&emsp;&emsp;其中，<script type="math/tex">\pmb W_C</script>和<script type="math/tex">\pmb b_c</script>分别是候选状态向量的权值矩阵和偏置向量。</p>
+<h3 id="output-gate">&clubs; 输出门（Output Gate）</h3>
+<p>&emsp;&emsp;输出门的输入是<script type="math/tex">\pmb h_{t-1}</script>与<script type="math/tex">\pmb x_t</script>拼接后得到的向量<script type="math/tex">[\pmb h_{t-1}, \pmb x_t]</script>，输出<script type="math/tex">\pmb o_t</script>被称为输出门的输出控制向量，用于控制Cell输出向量<script type="math/tex">\pmb h_t</script>的产生。</p>
+<p>&emsp;&emsp;根据图1-8中的输出门结构，可得到输出门输出向量<script type="math/tex">\pmb o_t</script>的计算公式如式(1-10)所示。</p>
+<p>
+<script type="math/tex; mode=display"> \pmb o_t = sigmoid(\pmb W_o ∙ [\pmb h_{t-1}, \pmb x_t] + \pmb b_o) \tag {1-10} </script>
+</p>
+<p>&emsp;&emsp;其中，<script type="math/tex">\pmb W_o</script>和<script type="math/tex">\pmb b_o</script>分别是输入门的权值矩阵和偏置向量。</p>
+<h3 id="_2">&clubs; 状态产生逻辑</h3>
+<p>&emsp;&emsp;状态产生逻辑根据Cell的上一个单元状态<script type="math/tex">\pmb C_{t-1}</script>、遗忘门产生的控制向量<script type="math/tex">\pmb f_t</script>、输入门产生的控制向量<script type="math/tex">\pmb i_t</script>以及候选状态向量<script type="math/tex">\pmb C ̃_t</script>，产生新的单元状态<script type="math/tex">\pmb C_t</script>。</p>
+<p>&emsp;&emsp;根据图1-8中的状态产生逻辑，可得到新的单元状态<script type="math/tex">\pmb C_t</script>的计算公式如式(1-11)所示。</p>
+<p>
+<script type="math/tex; mode=display"> \pmb C_t = \pmb C_{t-1} * \pmb f_t + \pmb i_t * \pmb C ̃_t \tag {1-11} </script>
+</p>
+<p>&emsp;&emsp;其中，<script type="math/tex">*</script>表示向量的 <em>Hadamard</em> 积。</p>
+<div class="admonition info">
+<p class="admonition-title">补充说明 <img alt="📣" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/1f4e3.svg" title=":mega:" /></p>
+<p>向量 <em>Hadamard</em> 积的定义：<br />
+&emsp;&emsp;设有维度相同的向量<script type="math/tex">\pmb a = \{a_1,a_2,⋯,a_n\}</script>和向量<script type="math/tex">\pmb b = \{b_1,b_2,⋯,b_n\}</script>，则有：<br />
+<center><script type="math/tex">\pmb a * \pmb b = \{a_1 b_1, a_2 b_2, ⋯, a_n b_n\}</script></center></p>
+</div>
+<h3 id="_3">&clubs; 输出逻辑</h3>
+<p>&emsp;&emsp;输出逻辑根据Cell的新状态<script type="math/tex">\pmb C_t</script>和输出门的控制向量<script type="math/tex">\pmb o_t</script>，产生LSTM Cell的对外输出向量<script type="math/tex">\pmb h_t</script>。</p>
+<p>&emsp;&emsp;根据图1-8所示的输出逻辑，可得到Cell的输出向量<script type="math/tex">\pmb h_t</script>的计算公式如式(1-12)所示。</p>
+<p>
+<script type="math/tex; mode=display"> \pmb h_t = \pmb o_t * tanh⁡(\pmb C_t) \tag {1-12} </script>
+</p>
+<p>&emsp;&emsp;观察式(1-7)至式(1-12)，可以发现向量<script type="math/tex">\pmb f_t</script>、<script type="math/tex">\pmb i_t</script>、<script type="math/tex">\pmb C ̃_t</script>、<script type="math/tex">\pmb o_t</script>、<script type="math/tex">\pmb C_t</script>和<script type="math/tex">\pmb h_t</script>都具有相同的维度，从而权值矩阵<script type="math/tex">\pmb W_f</script>、<script type="math/tex">\pmb W_i</script>、<script type="math/tex">\pmb W_C</script>和<script type="math/tex">\pmb W_o</script>维度相同，偏置向量<script type="math/tex">\pmb b_f</script>、<script type="math/tex">\pmb b_i</script>、<script type="math/tex">\pmb b_c</script>和<script type="math/tex">\pmb b_o</script>也维度相同。</p>
+<p>&emsp;&emsp;为方便描述，将n维向量<script type="math/tex">\pmb a</script>的维度记为dim(<script type="math/tex">\pmb a</script>)，即dim(<script type="math/tex">\pmb a</script>) = n。</p>
+<p>&emsp;&emsp;一般地，将<script type="math/tex">\pmb h_t</script>的维度称为hidden_size或num_units，表示LSTM Cell所等效的隐藏层节点数目，即dim(<script type="math/tex">\pmb h_t</script>) = hidden_size或dim(<script type="math/tex">\pmb h_t</script>) = num_units。由此可将各个权值矩阵的维度表示为hidden_size×(dim(<script type="math/tex">\pmb x_t</script>) + hidden_size)，而各偏置向量的维度就是hidden_size。</p>
+<h2 id="3-lstm">3. 基于LSTM的手写数字识别</h2>
+<h3 id="31-mnist">3.1 MNIST手写数字数据集</h3>
+<p>&emsp;&emsp;MNIST数据集是28×28像素的灰度手写数字图片，其中数字的范围从0到9，具体如表1-1所示（参考自<a href="http://yann.lecun.com/exdb/mnist/">http://yann.lecun.com/exdb/mnist/</a>）。</p>
+<p><center>表1-1 MNIST数据集描述</center>
+<center></p>
+<table>
+<thead>
+<tr>
+<th align="center">文  件</th>
+<th align="center">内  容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">train-images-idx3-ubyte.gz</td>
+<td align="center">训练集图片（训练集55000张，验证集5000张）</td>
+</tr>
+<tr>
+<td align="center">train-labels-idx1-ubyte.gz</td>
+<td align="center">训练集图片所对应的数字标签</td>
+</tr>
+<tr>
+<td align="center">t10k-images-idx3-ubyte.gz</td>
+<td align="center">测试集图片（10000张）</td>
+</tr>
+<tr>
+<td align="center">t10k-labels-idx1-ubyte.gz</td>
+<td align="center">测试集图片所对应的数字标签</td>
+</tr>
+</tbody>
+</table>
+<p></center></p>
+<p>&emsp;&emsp;每一张图片都有对应的标签，也就是图片所对应的数字。例如，图1-9所示的图片显示的是数字1，即其标签为1。</p>
+<p><center><img src="../assets/1-9.png" width = 400></center>
+<center>图1-9 MNIST数据集图片范例</center></p>
+<p>&emsp;&emsp;MNIST数据集包含训练集和测试集2部分。其中，训练集共60000张手写数字图片（55000张作为训练集，剩余5000张作为验证集）；而测试集则包含10000张手写数字图片。训练集是一个维度为[60000, 784]的张量——第1个维度表示训练集图片的数量，第2个维度表示每张图片的像素点个数。此张量里的每一个元素，都表示某张图片里的某个像素的强度值，值介于0和1之间。</p>
+<p>&emsp;&emsp;每一张训练集图片都有一个与之对应的0到9之间的数字标签，用来表示训练集图片所显示的数字。此处使用独热向量（One-hot Vector）来记录训练集图片的标签。独热向量由若干个独热编码（One-hot Code）组成。每一个独热编码的位宽均为10（因为0-9共有10个数字），且独热编码中只有一位是1，其余位均是0。例如，图1-9所示的图片，其标签为1，且对应的独热编码是[0,1,0,0,0,0,0,0,0,0]。由此，可将训练集所对应的标签集看作是一个[60000, 10]的二进制矩阵，如图1-10所示。</p>
+<p><center><img src="../assets/1-10.png" width = 350></center>
+<center>图1-10 MNIST数据集与标签集</center></p>
+<h3 id="32-lstm">3.2 LSTM识别手写数字</h3>
+<p>&emsp;&emsp;MNIST数据集的每一张手写数字图片都是一个28×28的二维矩阵。为此，可采用包含输入层、LSTM Cell和输出层的RNN网络，且输入层包含28个神经元，隐藏层的LSTM Cell包含128个神经元（num_units为128，即dim(<script type="math/tex">\pmb h_t</script>) = 128），而输出层则包含10个神经元，代表手写数字图片所具有的10个分类结果。该RNN的网络结构如图1-11所示。</p>
+<p><center><img src="../assets/1-11.png" width = 600></center>
+<center>图1-11 本实验的RNN网络结构</center></p>
+<p>&emsp;&emsp;接下来，讨论如何使用图1-11所示的RNN网络对手写数字图片进行预测。</p>
+<p>&emsp;&emsp;不妨将输入的手写数字图片的每一行看作是一个行向量，则每一张手写数字图片都可以表示成一个包含28个行向量的列向量，如图1-12所示。</p>
+<p><center><img src="../assets/1-12.png" width = 500></center>
+<center>图1-12 MNIST手写数字图片示意图</center></p>
+<p>&emsp;&emsp;由此，可以得到一个长度为28的输入序列。利用RNN进行前向推导时，每次向网络中输入一个行向量<script type="math/tex">\pmb x_i(0≤i<28)</script>，此时RNN网络会产生相应的输出<script type="math/tex">\pmb h_i</script>；当行向量<script type="math/tex">\pmb x_{27}</script>被输入RNN进行前向推导时，RNN产生的输出<script type="math/tex">\pmb h_{27}</script>就是LSTM Cell的最终输出向量，该向量包含了所输入图片的预测分类信息，如图1-13所示。</p>
+<p><center><img src="../assets/1-13.png" width = 400></center>
+<center>图1-13 RNN识别手写数字图片的示意图</center></p>
+<p>&emsp;&emsp;接下来，使用全连接层作为的线性分类器对LSTM Cell输出的<script type="math/tex">\pmb h_{27}</script>向量进行分类，其计算公式如式(1-13)所示。</p>
+<p>
+<script type="math/tex; mode=display"> \pmb y_{27} = \pmb W_y ∙ \pmb h_{27} + \pmb b_y \tag {1-13} </script>
+</p>
+<p>&emsp;&emsp;最后，找到分类向量<script type="math/tex">\pmb y_{27}</script>的最大分量所对应的下标，即为输入图片的预测值。</p>
+<h2 id="4-rnn">4. RNN加速器架构</h2>
+<p>&emsp;&emsp;本实验设计的RNN加速器架构如图1-14所示。</p>
+<p><center><img src="../assets/1-14.png" width = 500></center>
+<center>图1-14 RNN加速器架构图</center></p>
+<p>&emsp;&emsp;在图1-14中，RNN加速器主要由PS端的ARM CPU、PL端的RNN加速IP核、PL端的DMA控制器和DDR控制器组成。PS端的ARM CPU用于对加速系统进行必要的初始化，比如在运行时加载Overlay、配置DMA控制器等；此外还负责对RNN网络推导所需的数据进行预处理，比如对MNIST数据集进行解析等。DDR控制器用于解析PS和PL对板上DDR存储器的访问请求，并向DDR存储芯片发出相应的读写信号。DMA控制器用于实现PS与PL之间的快速数据传输，以提高加速器的整体性能。RNN硬件IP核用于实现RNN网络前向推导的硬件加速，是整个硬件加速系统的核心运算部件。</p>
+<p>&emsp;&emsp;增设了DMA控制器后，ARM CPU可通过DMA方式与RNN IP核进行快速的数据交互。在总线频率为150MHz、总线数据位宽为32bit的前提下，PS与PL之间的实测通信带宽可以达到550MB/s以上（理论最大带宽为600MB/s）。</p>
+<p>&emsp;&emsp;需要注意的是，单次DMA传输的数据批量越大，能够获得的带宽越大，数据传输速率越高。当数据批量达到阈值后，带宽不再增大，进入饱和状态。</p>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="../overview/" class="md-footer__link md-footer__link--prev" aria-label="上一页: 实验概述" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                上一页
+              </span>
+              实验概述
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../step/" class="md-footer__link md-footer__link--next" aria-label="下一页: 实验步骤" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                下一页
+              </span>
+              实验步骤
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            Copyright &copy; 2020 - 2021 哈尔滨工业大学（深圳）
+          </div>
+        
+        
+          Made with
+          <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+            Material for MkDocs
+          </a>
+        
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs"], "translations": {"clipboard.copy": "\u590d\u5236", "clipboard.copied": "\u5df2\u590d\u5236", "search.config.lang": "ja", "search.config.pipeline": "trimmer, stemmer", "search.config.separator": "[\\uff0c\\u3002]+", "search.placeholder": "\u641c\u7d22", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../../assets/javascripts/workers/search.fcfe8b6d.min.js", "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.b1047164.min.js"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+      
+    
+  </body>
+</html>

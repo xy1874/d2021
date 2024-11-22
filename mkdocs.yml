@@ -1,0 +1,77 @@
+site_name: 深度学习体系结构（2021秋季） | 哈工大（深圳）
+copyright: 'Copyright &copy; 2020 - 2021 哈尔滨工业大学（深圳）'
+repo_name: 'HITSZ-Course-DLA'
+repo_url: 'https://gitee.com/hitsz-cslab/dla'
+
+markdown_extensions:
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:pymdownx.emoji.twemoji
+      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tabbed
+  - pymdownx.tilde
+  - admonition
+  - mdx_math:
+      enable_dollar_delimiter: True
+
+extra_javascript:
+  - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML
+  # - mathjaxhelper.js
+
+extra_css:
+  - theme.css
+
+theme:
+  language: 'zh'
+  name: material
+  features:
+    - navigation.tabs
+  icon:
+    logo: fontawesome/solid/microchip
+    repo: fontawesome/brands/git-alt
+    # favicon: fontawesome/solid/microchip
+  # palette:
+  #   primary: 'blue grey'
+  #   accent: 'blue grey'
+nav:
+  - 首页:
+    - 实验须知: index.md
+    - 作业提交说明: ojguide.md
+    - Vivado下载链接: vivadodl.md
+  - 实验1：神经网络加速器设计入门:
+    - 实验概述: lab1/overview.md
+    - 实验原理: lab1/theory.md
+    - 实验步骤: lab1/step.md
+    - 验收与提交: lab1/submit.md
+    - 附录:
+      - 1. PYNQ-Z2上手指南: lab1/appendix1.md
+      - 2. Jupyter Notebook简介: lab1/appendix2.md
+  - 实验2：YOLO算法量化加速:
+    - 实验概述: lab2/overview.md
+    - 实验原理: lab2/theory.md
+    - 实验步骤: lab2/step.md
+    - 附加题: lab2/extra.md
+    - 验收与提交: lab2/submit.md
+  - 实验3：基于LSTM的MNIST手写数字识别加速:
+    - 实验概述: lab3/overview.md
+    - 实验原理: lab3/theory.md
+    - 实验步骤: lab3/step.md
+    - 附加题: lab3/extra.md
+    - 验收与提交: lab3/submit.md
+  - 实验4：基于脉动阵列的CNN加速:
+    - 实验概述: lab4/overview.md
+    - 实验原理: lab4/theory.md
+    - 实验步骤: lab4/step.md
+    - 验收与提交: lab4/submit.md
+  
