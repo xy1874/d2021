@@ -1,7 +1,8 @@
-site_name: 深度学习体系结构（2021秋季） | 哈工大（深圳）
-copyright: 'Copyright &copy; 2020 - 2021 哈尔滨工业大学（深圳）'
-repo_name: 'HITSZ-Course-DLA'
-repo_url: 'https://gitee.com/hitsz-cslab/dla'
+# site_name: 深度学习体系结构（2021秋季） | 哈工大（深圳）
+site_name: 深度学习体系结构（2021秋季）
+# copyright: 'Copyright &copy; 2020 - 2021 哈尔滨工业大学（深圳）'
+# repo_name: 'HITSZ-Course-DLA'
+# repo_url: 'https://gitee.com/hitsz-cslab/dla'
 
 markdown_extensions:
   - pymdownx.betterem:
